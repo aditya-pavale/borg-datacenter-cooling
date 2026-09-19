@@ -33,6 +33,7 @@ results/**/*.zip
 
 .ipynb_checkpoints/
 *.log
+.~lock.*#
 
 .pytest_cache/
 *.egg-info/
