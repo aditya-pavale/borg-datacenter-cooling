@@ -27,17 +27,23 @@ from controllers.classical import FixedController, ThresholdController, PIDContr
 from controllers.rl_adapters import PPOControllerAdapter, MAPPOControllerAdapter  # noqa: E402
 from marl.mappo import MAPPOTrainer  # noqa: E402
 from evaluation.run_controller import run_controller_episodes, fixed_test_start_indices  # noqa: E402
+from evaluation.v2_common import results_dir, models_dir, disclaimer  # noqa: E402
 
 N_EPISODES = 20
-RESULTS_DIR = REPO_ROOT / "results" / "pilot"
 
 
 def main():
     cfg = load_v2_config()
-    n_zones = cfg["data"]["n_zones"]
+    assert cfg["data"]["active_cell_set"] == "pilot", (
+        "v2_final_evaluation_pilot.py is a smoke-test script by design and "
+        "refuses to run against active_cell_set='final' -- write/extend a "
+        "proper final-evaluation script for that (see "
+        "docs/final_pipeline_readiness_audit.md)."
+    )
     ccfg = cfg["controllers"]
 
     ref_core = V2CoolingCore(split="test", cfg=cfg)
+    n_zones = ref_core.n_zones
     start_indices = [int(i) for i in fixed_test_start_indices("test", N_EPISODES, cfg=cfg, core=ref_core)]
 
     all_results = {}
@@ -52,7 +58,7 @@ def main():
         result = run_controller_episodes(controller, "test", start_indices, cfg=cfg, core=core)
         all_results[name] = result["aggregated"]
 
-    ppo_path = REPO_ROOT / "models" / "v2" / "ppo" / "ppo_seed0.zip"
+    ppo_path = models_dir(cfg, "ppo", "ppo_seed0.zip")
     if ppo_path.exists():
         model = PPO.load(ppo_path)
         core = V2CoolingCore(split="test", cfg=cfg)
@@ -60,7 +66,7 @@ def main():
         result = run_controller_episodes(adapter, "test", start_indices, cfg=cfg, core=core)
         all_results["ppo_pilot_smoketest"] = result["aggregated"]
 
-    mappo_actor_path = REPO_ROOT / "models" / "v2" / "mappo" / "actor_seed0.pt"
+    mappo_actor_path = models_dir(cfg, "mappo", "actor_seed0.pt")
     if mappo_actor_path.exists():
         core = V2CoolingCore(split="test", cfg=cfg)
         env = MultiAgentCoolingEnv(core=core)
@@ -79,16 +85,17 @@ def main():
               f"{agg['thermal.violation_pct']['mean']:>12.2f} "
               f"{agg['thermal.max_temp_c']['mean']:>12.2f}")
 
-    RESULTS_DIR.mkdir(parents=True, exist_ok=True)
-    with open(RESULTS_DIR / "pilot_controller_comparison_all.json", "w") as f:
+    out_dir = results_dir(cfg)
+    out_dir.mkdir(parents=True, exist_ok=True)
+    with open(out_dir / "pilot_controller_comparison_all.json", "w") as f:
         json.dump(
             {
-                "pilot_disclaimer": (
-                    "Cells a-d only. PPO/MAPPO trained for a smoke-test-scale "
+                "disclaimer": (
+                    disclaimer(cfg) + " PPO/MAPPO trained for a smoke-test-scale "
                     "budget (8640 timesteps / 30 updates vs V1's already-reduced "
                     "100000 timesteps / 300 updates) purely to validate the V2 "
                     "pipeline executes correctly end-to-end. NOT a real "
-                    "controller comparison -- see results/pilot/README.md."
+                    "controller comparison."
                 ),
                 "n_episodes": N_EPISODES,
                 "start_indices": start_indices,
@@ -97,7 +104,7 @@ def main():
             f,
             indent=2,
         )
-    print(f"Wrote {RESULTS_DIR / 'pilot_controller_comparison_all.json'}")
+    print(f"Wrote {out_dir / 'pilot_controller_comparison_all.json'}")
 
 
 if __name__ == "__main__":

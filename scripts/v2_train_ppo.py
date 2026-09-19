@@ -25,6 +25,7 @@ from stable_baselines3.common.monitor import Monitor  # noqa: E402
 
 from environment.single_agent_env import SingleAgentCoolingEnv  # noqa: E402
 from environment.v2_cooling_core import V2CoolingCore, load_v2_config  # noqa: E402
+from evaluation.v2_common import models_dir as get_models_dir  # noqa: E402
 
 PILOT_TIMESTEPS = 8640  # 30 episodes worth (288 steps/ep) -- smoke-test scale
 
@@ -45,11 +46,11 @@ def main(seed: int = 0, total_timesteps: int | None = None):
     )
     model.learn(total_timesteps=total_timesteps, progress_bar=False)
 
-    models_dir = REPO_ROOT / "models" / "v2" / "ppo"
-    models_dir.mkdir(parents=True, exist_ok=True)
-    model.save(models_dir / f"ppo_seed{seed}")
-    print(f"[PILOT/SMOKE-TEST] seed {seed}: saved PPO model to {models_dir / f'ppo_seed{seed}'}.zip "
-          f"({total_timesteps} timesteps)")
+    m_dir = get_models_dir(cfg, "ppo")
+    m_dir.mkdir(parents=True, exist_ok=True)
+    model.save(m_dir / f"ppo_seed{seed}")
+    print(f"[{cfg['data']['active_cell_set'].upper()}] seed {seed}: saved PPO model to "
+          f"{m_dir / f'ppo_seed{seed}'}.zip ({total_timesteps} timesteps)")
     return model
 
 

@@ -127,5 +127,5 @@ def test_open_loop_cooling_off_DOES_depend_on_shield_state(cfg):
 def test_n_zones_equals_active_cell_count(cfg):
     core = V2CoolingCore(split="train", cfg=cfg)
     df = pd.read_parquet(DATA_DIR / "train_pilot.parquet")
-    assert core.n_zones == cfg["data"]["n_zones"]
+    assert core.n_zones == len(cfg["data"]["active_cells"])
     assert core.n_zones == df["cell"].nunique()

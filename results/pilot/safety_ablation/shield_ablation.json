@@ -1,5 +1,5 @@
 {
-  "pilot_disclaimer": "Cells a-d only -- see results/pilot/README.md. NOT final.",
+  "disclaimer": "PILOT/DEVELOPMENT data -- cells a,b,c,d only. See results/pilot/README.md. NOT a final V2 result.",
   "n_episodes": 20,
   "results": {
     "fixed__shield_on": {

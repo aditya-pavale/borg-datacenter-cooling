@@ -14,17 +14,17 @@ sys.path.insert(0, str(REPO_ROOT / "src"))
 from environment.v2_cooling_core import V2CoolingCore, load_v2_config  # noqa: E402
 from controllers.v2_mpc import V2MPCController  # noqa: E402
 from evaluation.run_controller import run_controller_episodes, fixed_test_start_indices  # noqa: E402
+from evaluation.v2_common import results_dir, disclaimer  # noqa: E402
 
 N_EPISODES = 20
-RESULTS_DIR = REPO_ROOT / "results" / "pilot" / "controllers"
 
 
 def main():
     cfg = load_v2_config()
-    n_zones = cfg["data"]["n_zones"]
     mcfg = cfg["controllers"]["mpc"]
 
     core = V2CoolingCore(split="test", cfg=cfg)
+    n_zones = core.n_zones
     start_indices = [int(i) for i in fixed_test_start_indices("test", N_EPISODES, cfg=cfg, core=core)]
 
     controller = V2MPCController(
@@ -37,12 +37,13 @@ def main():
           f"violation={agg['thermal.violation_pct']['mean']:.2f}%, "
           f"max_temp={agg['thermal.max_temp_c']['mean']:.2f}C")
 
-    RESULTS_DIR.mkdir(parents=True, exist_ok=True)
-    out_path = RESULTS_DIR / "mpc_result.json"
+    out_dir = results_dir(cfg, "controllers")
+    out_dir.mkdir(parents=True, exist_ok=True)
+    out_path = out_dir / "mpc_result.json"
     with open(out_path, "w") as f:
         json.dump(
             {
-                "pilot_disclaimer": "Cells a-d only -- see results/pilot/README.md. NOT final.",
+                "disclaimer": disclaimer(cfg),
                 "n_episodes": N_EPISODES,
                 "result": result,
             },

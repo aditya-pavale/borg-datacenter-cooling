@@ -33,8 +33,24 @@ from thermal.thermal_model import ThermalParams, ThreeZoneThermalModel  # noqa: 
 from environment.safety_shield import shield_action  # noqa: E402
 
 
+def load_data_config() -> dict:
+    return yaml.safe_load((REPO_ROOT / "configs" / "data_config.yaml").read_text())
+
+
 def load_v2_config() -> dict:
-    return yaml.safe_load((REPO_ROOT / "configs" / "v2_config.yaml").read_text())
+    """Single source of truth for `active_cell_set`: read from
+    configs/data_config.yaml (not duplicated in v2_config.yaml -- see
+    the comment in that file's `data:` section for why the old
+    duplication was a real hazard). `results_dir` is derived here too,
+    as results/<active_cell_set>, so pilot and final outputs can never
+    land in the same directory."""
+    cfg = yaml.safe_load((REPO_ROOT / "configs" / "v2_config.yaml").read_text())
+    data_cfg = load_data_config()
+    cell_set = data_cfg["active_cell_set"]
+    cfg["data"]["active_cell_set"] = cell_set
+    cfg["data"]["active_cells"] = data_cfg["cells"][cell_set]
+    cfg["paths"]["results_dir"] = f"results/{cell_set}"
+    return cfg
 
 
 class V2CoolingCore:
@@ -44,7 +60,6 @@ class V2CoolingCore:
         self.use_safety_shield = (
             self.cfg["safety_shield"]["enabled"] if use_safety_shield is None else use_safety_shield
         )
-        self.n_zones = self.cfg["data"]["n_zones"]
         self.bin_seconds = self.cfg["data"]["bin_seconds"]
         self.steps_per_day = int(86400 / self.bin_seconds)
         self.use_forecast = use_forecast
@@ -59,6 +74,21 @@ class V2CoolingCore:
         power_pivot = df.pivot(index="bin_id", columns="zone", values="predicted_power_util").sort_index()
         self.bin_ids = workload_pivot.index.to_numpy()
         self.n_bins = len(self.bin_ids)
+
+        # n_zones is DERIVED from the actual loaded data, never trusted
+        # from a manually-maintained config integer -- the exact class
+        # of bug this guards against: switching active_cell_set to
+        # "final" (8 cells) while some config still says n_zones=4 would
+        # otherwise silently truncate every per-zone loop to the first 4
+        # zones instead of failing loudly.
+        self.n_zones = workload_pivot.shape[1]
+        expected_cells = self.cfg["data"].get("active_cells")
+        if expected_cells is not None:
+            assert self.n_zones == len(expected_cells), (
+                f"Loaded data has {self.n_zones} zones but configs/data_config.yaml's "
+                f"active_cell_set={cell_set!r} lists {len(expected_cells)} cells "
+                f"({expected_cells}) -- data/config drift, do not proceed silently."
+            )
 
         # Normalize the raw workload signal (sum_cpu, not already in
         # [0,1] like V1's cpu_util) for the RL observation only -- heat

@@ -12,15 +12,16 @@ from pathlib import Path
 
 import joblib
 import pandas as pd
-import yaml
 from sklearn.ensemble import RandomForestRegressor
 
 REPO_ROOT = Path(__file__).resolve().parents[1]
-CONFIG_PATH = REPO_ROOT / "configs" / "v2_config.yaml"
+sys.path.insert(0, str(REPO_ROOT / "src"))
+from environment.v2_cooling_core import load_v2_config  # noqa: E402
+from evaluation.v2_common import models_dir  # noqa: E402
 
 
 def main():
-    cfg = yaml.safe_load(CONFIG_PATH.read_text())
+    cfg = load_v2_config()
     cell_set = cfg["data"]["active_cell_set"]
     pcfg = cfg["power_model"]
     data_dir = REPO_ROOT / cfg["paths"]["processed_dir"]
@@ -33,9 +34,9 @@ def main():
     model = RandomForestRegressor(n_estimators=200, max_depth=8, random_state=0, n_jobs=-1)
     model.fit(train[features], train[target])
 
-    model_dir = REPO_ROOT / "models" / "v2" / "power_model"
-    model_dir.mkdir(parents=True, exist_ok=True)
-    joblib.dump(model, model_dir / "random_forest.joblib")
+    m_dir = models_dir(cfg, "power_model")
+    m_dir.mkdir(parents=True, exist_ok=True)
+    joblib.dump(model, m_dir / "random_forest.joblib")
 
     for split in ["train", "val", "test"]:
         path = data_dir / f"{split}_{cell_set}.parquet"

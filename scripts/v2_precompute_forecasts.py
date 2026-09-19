@@ -13,40 +13,41 @@ from pathlib import Path
 import numpy as np
 import pandas as pd
 import torch
-import yaml
 
 REPO_ROOT = Path(__file__).resolve().parents[1]
 sys.path.insert(0, str(REPO_ROOT / "src"))
 
 from forecasting.gru_model import GRUForecaster  # noqa: E402
+from environment.v2_cooling_core import load_v2_config  # noqa: E402
+from evaluation.v2_common import models_dir  # noqa: E402
 
 DATA_DIR = REPO_ROOT / "data" / "processed" / "v2"
-MODELS_DIR = REPO_ROOT / "models" / "v2" / "forecasting"
 
 
 def main():
-    cfg = yaml.safe_load((REPO_ROOT / "configs" / "v2_config.yaml").read_text())
+    cfg = load_v2_config()
     fc_cfg = cfg["forecasting"]
     lookback = fc_cfg["lookback_steps"]
     horizon = fc_cfg["horizon_steps"]
-    n_zones = cfg["data"]["n_zones"]
     value_col = fc_cfg["value_col"]
     cell_set = cfg["data"]["active_cell_set"]
+    m_dir = models_dir(cfg, "forecasting")
 
-    scaler = json.loads((MODELS_DIR / "scaler.json").read_text())
+    scaler = json.loads((m_dir / "scaler.json").read_text())
     train_min, train_max = scaler["min"], scaler["max"]
     scale = max(train_max - train_min, 1e-8)
 
     model = GRUForecaster(hidden_size=fc_cfg["gru_hidden_size"],
                            num_layers=fc_cfg["gru_num_layers"],
                            horizon=horizon)
-    model.load_state_dict(torch.load(MODELS_DIR / "gru_forecaster.pt"))
+    model.load_state_dict(torch.load(m_dir / "gru_forecaster.pt"))
     model.eval()
 
     for split in ["train", "val", "test"]:
         df = pd.read_parquet(DATA_DIR / f"{split}_{cell_set}.parquet")
         pivot = df.pivot(index="bin_id", columns="zone", values=value_col).sort_index()
         n_bins = len(pivot)
+        n_zones = pivot.shape[1]  # derived, not config-trusted
         workload = pivot.to_numpy(dtype=np.float32)
 
         forecasts = np.zeros((n_bins, n_zones, horizon), dtype=np.float32)

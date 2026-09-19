@@ -27,9 +27,13 @@ from sklearn.linear_model import LinearRegression
 from sklearn.metrics import mean_absolute_error, mean_squared_error, r2_score
 from sklearn.preprocessing import OneHotEncoder
 
+import sys
 REPO_ROOT = Path(__file__).resolve().parents[1]
+sys.path.insert(0, str(REPO_ROOT / "src"))
+from environment.v2_cooling_core import load_v2_config  # noqa: E402
+from evaluation.v2_common import results_dir, disclaimer  # noqa: E402
+
 PROC_DIR = REPO_ROOT / "data" / "processed" / "v2"
-OUT_DIR = REPO_ROOT / "results" / "pilot" / "power_model"
 
 FEATURES = ["sum_cpu", "sum_mem"]
 TARGET = "mean_measured_power_util"
@@ -56,8 +60,10 @@ def evaluate(y_true, y_pred) -> dict:
 
 
 def main():
-    train = pd.read_parquet(PROC_DIR / "train_pilot.parquet")
-    val = pd.read_parquet(PROC_DIR / "val_pilot.parquet")
+    cfg = load_v2_config()
+    cell_set = cfg["data"]["active_cell_set"]
+    train = pd.read_parquet(PROC_DIR / f"train_{cell_set}.parquet")
+    val = pd.read_parquet(PROC_DIR / f"val_{cell_set}.parquet")
 
     results = {}
 
@@ -116,21 +122,22 @@ def main():
     print("Residuals by workload-tercile (validation, best model):")
     print(by_regime)
 
-    OUT_DIR.mkdir(parents=True, exist_ok=True)
-    with open(OUT_DIR / "metrics.json", "w") as f:
+    out_dir = results_dir(cfg, "power_model")
+    out_dir.mkdir(parents=True, exist_ok=True)
+    with open(out_dir / "metrics.json", "w") as f:
         json.dump(
             {
                 "selected_on": "validation RMSE",
                 "best_model": best_name,
                 "results": results,
                 "residuals_by_load_tercile": by_regime.reset_index().to_dict("records"),
-                "note": "Pilot (cells a-d) only. Not final. Target is a PDU-capacity "
+                "disclaimer": disclaimer(cfg) + " Target is a PDU-capacity "
                         "utilization fraction, not absolute watts.",
             },
             f,
             indent=2,
         )
-    print(f"Wrote {OUT_DIR / 'metrics.json'}")
+    print(f"Wrote {out_dir / 'metrics.json'}")
 
     for name, m in results.items():
         print(name, {k: v for k, v in m.items() if k in ("mae", "rmse", "r2")})

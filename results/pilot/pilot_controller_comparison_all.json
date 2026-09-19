@@ -1,5 +1,5 @@
 {
-  "pilot_disclaimer": "Cells a-d only. PPO/MAPPO trained for a smoke-test-scale budget (8640 timesteps / 30 updates vs V1's already-reduced 100000 timesteps / 300 updates) purely to validate the V2 pipeline executes correctly end-to-end. NOT a real controller comparison -- see results/pilot/README.md.",
+  "disclaimer": "PILOT/DEVELOPMENT data -- cells a,b,c,d only. See results/pilot/README.md. NOT a final V2 result. PPO/MAPPO trained for a smoke-test-scale budget (8640 timesteps / 30 updates vs V1's already-reduced 100000 timesteps / 300 updates) purely to validate the V2 pipeline executes correctly end-to-end. NOT a real controller comparison.",
   "n_episodes": 20,
   "start_indices": [
     47,
@@ -354,78 +354,78 @@
     },
     "mappo_pilot_smoketest": {
       "energy.total_kwh": {
-        "mean": 43.47444680326498,
-        "std": 0.0797084354762906,
+        "mean": 43.48881856488508,
+        "std": 0.08062041498890649,
         "n_episodes": 20
       },
       "energy.mean_kw": {
-        "mean": 1.811435283469374,
-        "std": 0.0033211848115121106,
+        "mean": 1.8120341068702122,
+        "std": 0.0033591839578711,
         "n_episodes": 20
       },
       "thermal.mean_temp_c": {
-        "mean": 26.803380261791517,
-        "std": 0.060751793122119244,
+        "mean": 26.797463782347602,
+        "std": 0.06088324436203114,
         "n_episodes": 20
       },
       "thermal.max_temp_c": {
-        "mean": 27.56727638275812,
-        "std": 0.09000431795399341,
+        "mean": 27.5656051211018,
+        "std": 0.08978604442471531,
         "n_episodes": 20
       },
       "thermal.min_temp_c": {
-        "mean": 24.08361302073114,
-        "std": 0.003827519618262534,
+        "mean": 24.080761470838137,
+        "std": 0.0040596360962541975,
         "n_episodes": 20
       },
       "thermal.temp_variance": {
-        "mean": 0.38445839252268,
-        "std": 0.030780134401536315,
+        "mean": 0.3923025312807594,
+        "std": 0.031381484508938795,
         "n_episodes": 20
       },
       "thermal.violation_steps": {
-        "mean": 177.4,
-        "std": 15.910373974234547,
+        "mean": 176.6,
+        "std": 15.95430976256886,
         "n_episodes": 20
       },
       "thermal.violation_pct": {
-        "mean": 61.59722222222223,
-        "std": 5.52443540772033,
+        "mean": 61.31944444444444,
+        "std": 5.539690889780855,
         "n_episodes": 20
       },
       "thermal.cumulative_violation_severity": {
-        "mean": 122.83456928274686,
-        "std": 39.677851789782665,
+        "mean": 121.76831402639183,
+        "std": 39.3369090572834,
         "n_episodes": 20
       },
       "thermal.max_overshoot_c": {
-        "mean": 0.5672763827581202,
-        "std": 0.09000431795399338,
+        "mean": 0.5656051211018045,
+        "std": 0.08978604442471531,
         "n_episodes": 20
       },
       "control.mean_action_change": {
-        "mean": 0.003610081588717333,
-        "std": 0.00031209797430916796,
+        "mean": 0.0035523925168872914,
+        "std": 0.00032553691588667837,
         "n_episodes": 20
       },
       "control.max_action_change": {
-        "mean": 0.8181870383632684,
-        "std": 0.08315203226354521,
+        "mean": 0.8319451038326726,
+        "std": 0.0794143939971129,
         "n_episodes": 20
       },
       "control.mean_action": {
-        "mean": 0.905717641734687,
-        "std": 0.0016605924057560505,
+        "mean": 0.9060170534351061,
+        "std": 0.0016795919789355674,
         "n_episodes": 20
       },
       "safety.n_interventions": {
-        "mean": 1037.65,
-        "std": 3.539420856580918,
+        "mean": 1034.35,
+        "std": 4.41899309798058,
         "n_episodes": 20
       },
       "safety.intervention_pct_steps": {
-        "mean": 90.46875,
-        "std": 0.3002016747533057,
+        "mean": 90.20833333333334,
+        "std": 0.3739697782732272,
         "n_episodes": 20
       },
       "n_steps": {

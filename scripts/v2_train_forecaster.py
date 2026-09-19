@@ -21,7 +21,6 @@ import numpy as np
 import pandas as pd
 import torch
 import torch.nn as nn
-import yaml
 
 REPO_ROOT = Path(__file__).resolve().parents[1]
 sys.path.insert(0, str(REPO_ROOT / "src"))
@@ -30,15 +29,10 @@ from forecasting.dataset import make_windows, per_zone_series  # noqa: E402
 from forecasting.baselines import persistence_forecast, moving_average_forecast  # noqa: E402
 from forecasting.gru_model import GRUForecaster  # noqa: E402
 from forecasting.train_forecaster import mae, rmse, r2, segment_metrics  # noqa: E402
+from environment.v2_cooling_core import load_v2_config  # noqa: E402
+from evaluation.v2_common import results_dir, models_dir, disclaimer  # noqa: E402
 
 DATA_DIR = REPO_ROOT / "data" / "processed" / "v2"
-MODELS_DIR = REPO_ROOT / "models" / "v2" / "forecasting"
-RESULTS_DIR = REPO_ROOT / "results" / "pilot" / "forecasting"
-CONFIG_PATH = REPO_ROOT / "configs" / "v2_config.yaml"
-
-
-def load_config() -> dict:
-    return yaml.safe_load(CONFIG_PATH.read_text())
 
 
 def build_all_windows(df: pd.DataFrame, n_zones: int, lookback: int, horizon: int, value_col: str):
@@ -53,17 +47,21 @@ def build_all_windows(df: pd.DataFrame, n_zones: int, lookback: int, horizon: in
 
 
 def main():
-    cfg = load_config()
+    cfg = load_v2_config()
     fc_cfg = cfg["forecasting"]
     lookback = fc_cfg["lookback_steps"]
     horizon = fc_cfg["horizon_steps"]
-    n_zones = cfg["data"]["n_zones"]
     value_col = fc_cfg["value_col"]
     cell_set = cfg["data"]["active_cell_set"]
 
     train = pd.read_parquet(DATA_DIR / f"train_{cell_set}.parquet")
     val = pd.read_parquet(DATA_DIR / f"val_{cell_set}.parquet")
     test = pd.read_parquet(DATA_DIR / f"test_{cell_set}.parquet")
+    n_zones = train["zone"].nunique()  # derived, not config-trusted (see v2_cooling_core.load_v2_config)
+    assert n_zones == len(cfg["data"]["active_cells"]), (
+        f"train_{cell_set}.parquet has {n_zones} zones but "
+        f"active_cell_set={cell_set!r} expects {len(cfg['data']['active_cells'])}"
+    )
 
     X_train, y_train, _ = build_all_windows(train, n_zones, lookback, horizon, value_col)
     X_val, y_val, _ = build_all_windows(val, n_zones, lookback, horizon, value_col)
@@ -148,7 +146,7 @@ def main():
     ma_pred = moving_average_forecast(X_test, horizon, window=4)
 
     results = {
-        "pilot_disclaimer": "Cells a-d only -- see results/pilot/README.md. NOT final.",
+        "disclaimer": disclaimer(cfg),
         "config": {"lookback": lookback, "horizon": horizon, "n_zones": n_zones,
                     "bin_seconds": cfg["data"]["bin_seconds"], "value_col": value_col,
                     "cell_set": cell_set},
@@ -173,13 +171,15 @@ def main():
             "moving_average": segment_metrics(y_test[mask], ma_pred[mask], f"moving_average_{name}"),
         }
 
-    MODELS_DIR.mkdir(parents=True, exist_ok=True)
-    RESULTS_DIR.mkdir(parents=True, exist_ok=True)
-    torch.save(model.state_dict(), MODELS_DIR / "gru_forecaster.pt")
-    (MODELS_DIR / "scaler.json").write_text(json.dumps({"min": train_min, "max": train_max}))
-    (MODELS_DIR / "config.json").write_text(json.dumps(fc_cfg))
-    (RESULTS_DIR / "training_history.json").write_text(json.dumps(history))
-    (RESULTS_DIR / "metrics.json").write_text(json.dumps(results, indent=2))
+    m_dir = models_dir(cfg, "forecasting")
+    r_dir = results_dir(cfg, "forecasting")
+    m_dir.mkdir(parents=True, exist_ok=True)
+    r_dir.mkdir(parents=True, exist_ok=True)
+    torch.save(model.state_dict(), m_dir / "gru_forecaster.pt")
+    (m_dir / "scaler.json").write_text(json.dumps({"min": train_min, "max": train_max}))
+    (m_dir / "config.json").write_text(json.dumps(fc_cfg))
+    (r_dir / "training_history.json").write_text(json.dumps(history))
+    (r_dir / "metrics.json").write_text(json.dumps(results, indent=2))
 
     print(json.dumps(results["overall"], indent=2))
     return results

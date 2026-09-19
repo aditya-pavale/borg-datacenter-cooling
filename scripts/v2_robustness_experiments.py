@@ -22,8 +22,7 @@ from environment.v2_cooling_core import V2CoolingCore, load_v2_config  # noqa: E
 from controllers.classical import PIDController, ThresholdController  # noqa: E402
 from evaluation.metrics import compute_episode_metrics, aggregate_across_episodes  # noqa: E402
 from evaluation.run_controller import fixed_test_start_indices  # noqa: E402
-
-RESULTS_DIR = REPO_ROOT / "results" / "pilot" / "robustness"
+from evaluation.v2_common import results_dir, disclaimer  # noqa: E402
 
 
 def run_with_workload_scale(controller, cfg, start_indices, scale):
@@ -75,8 +74,8 @@ def run_with_forecast_noise(controller, cfg, start_indices, noise_std):
 
 def main():
     cfg = load_v2_config()
-    n_zones = cfg["data"]["n_zones"]
     core = V2CoolingCore(split="test", cfg=cfg)
+    n_zones = core.n_zones
     starts = [int(i) for i in fixed_test_start_indices("test", n_episodes=15, cfg=cfg, core=core)]
 
     controllers = {
@@ -112,13 +111,14 @@ def main():
             print(f"noise_std={noise_std} {name}: energy={agg['energy.total_kwh']['mean']:.2f} "
                   f"viol_pct={agg['thermal.violation_pct']['mean']:.2f}")
 
-    RESULTS_DIR.mkdir(parents=True, exist_ok=True)
+    out_dir = results_dir(cfg, "robustness")
+    out_dir.mkdir(parents=True, exist_ok=True)
     out = {
-        "pilot_disclaimer": "Cells a-d only, classical controllers only (RL still smoke-test). NOT final.",
+        "disclaimer": disclaimer(cfg) + " Classical controllers only (RL still smoke-test).",
         **results,
     }
-    (RESULTS_DIR / "robustness_results.json").write_text(json.dumps(out, indent=2))
-    print(f"Wrote {RESULTS_DIR / 'robustness_results.json'}")
+    (out_dir / "robustness_results.json").write_text(json.dumps(out, indent=2))
+    print(f"Wrote {out_dir / 'robustness_results.json'}")
     return results
 
 

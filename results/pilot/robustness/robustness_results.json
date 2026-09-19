@@ -1,5 +1,5 @@
 {
-  "pilot_disclaimer": "Cells a-d only, classical controllers only (RL still smoke-test). NOT final.",
+  "disclaimer": "PILOT/DEVELOPMENT data -- cells a,b,c,d only. See results/pilot/README.md. NOT a final V2 result. Classical controllers only (RL still smoke-test).",
   "experiment_B_workload_spike": {
     "scale_1.0": {
       "pid": {

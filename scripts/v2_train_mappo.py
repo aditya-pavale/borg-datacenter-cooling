@@ -25,6 +25,7 @@ from environment.v2_cooling_core import V2CoolingCore, load_v2_config  # noqa: E
 from marl.mappo import MAPPOTrainer  # noqa: E402
 from evaluation.run_controller import fixed_test_start_indices, run_controller_episodes  # noqa: E402
 from controllers.rl_adapters import MAPPOControllerAdapter  # noqa: E402
+from evaluation.v2_common import models_dir as get_models_dir, results_dir as get_results_dir  # noqa: E402
 
 PILOT_UPDATES = 30
 
@@ -55,18 +56,19 @@ def main(seed: int = 0, total_updates: int | None = None):
         history.append({"update": update, "mean_reward": mean_reward, **stats})
         if update % 10 == 0 or update == total_updates - 1:
             val_metrics = evaluate_on_val(trainer, cfg, n_episodes=3)
-            print(f"[PILOT] update {update}/{total_updates} train_mean_reward={mean_reward:.4f} "
+            print(f"[{cfg['data']['active_cell_set'].upper()}] update {update}/{total_updates} "
+                  f"train_mean_reward={mean_reward:.4f} "
                   f"val_energy={val_metrics['energy.total_kwh']['mean']:.3f} "
                   f"val_viol_pct={val_metrics['thermal.violation_pct']['mean']:.2f}")
 
-    models_dir = REPO_ROOT / "models" / "v2" / "mappo"
-    models_dir.mkdir(parents=True, exist_ok=True)
-    torch.save(trainer.actor.state_dict(), models_dir / f"actor_seed{seed}.pt")
-    torch.save(trainer.critic.state_dict(), models_dir / f"critic_seed{seed}.pt")
+    m_dir = get_models_dir(cfg, "mappo")
+    m_dir.mkdir(parents=True, exist_ok=True)
+    torch.save(trainer.actor.state_dict(), m_dir / f"actor_seed{seed}.pt")
+    torch.save(trainer.critic.state_dict(), m_dir / f"critic_seed{seed}.pt")
 
-    results_dir = REPO_ROOT / "results" / "pilot" / "mappo"
-    results_dir.mkdir(parents=True, exist_ok=True)
-    (results_dir / f"training_history_seed{seed}.json").write_text(json.dumps(history))
+    r_dir = get_results_dir(cfg, "mappo")
+    r_dir.mkdir(parents=True, exist_ok=True)
+    (r_dir / f"training_history_seed{seed}.json").write_text(json.dumps(history))
 
     return trainer, history
 

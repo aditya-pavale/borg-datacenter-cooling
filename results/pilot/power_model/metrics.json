@@ -23,9 +23,9 @@
       "r2": 0.7144591302740689
     },
     "random_forest": {
-      "mae": 0.014051429787996388,
-      "rmse": 0.01797748644789102,
-      "r2": 0.7801582312208459,
+      "mae": 0.014051429787996395,
+      "rmse": 0.017977486447891027,
+      "r2": 0.7801582312208457,
       "feature_importances": {
         "sum_cpu": 0.5839463935977934,
         "sum_mem": 0.04873611874196981,
@@ -36,22 +36,22 @@
   "residuals_by_load_tercile": [
     {
       "regime": "low",
-      "mean": 0.0024150880776376057,
+      "mean": 0.0024150880776376083,
       "std": 0.015639285586022806,
       "count": 2382
     },
     {
       "regime": "mid",
-      "mean": 0.004094296722201895,
-      "std": 0.016301239011537374,
+      "mean": 0.00409429672220191,
+      "std": 0.01630123901153737,
       "count": 2381
     },
     {
       "regime": "high",
-      "mean": 0.014645686143524086,
-      "std": 0.014916390678204666,
+      "mean": 0.014645686143524095,
+      "std": 0.014916390678204659,
       "count": 2381
     }
   ],
-  "note": "Pilot (cells a-d) only. Not final. Target is a PDU-capacity utilization fraction, not absolute watts."
+  "disclaimer": "PILOT/DEVELOPMENT data -- cells a,b,c,d only. See results/pilot/README.md. NOT a final V2 result. Target is a PDU-capacity utilization fraction, not absolute watts."
 }

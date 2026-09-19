@@ -11,13 +11,25 @@ seeds: [0, 1, 2]
 paths:
   processed_dir: data/processed/v2
   models_dir: models/v2
-  results_dir: results/pilot
+  # results_dir is NOT set here -- it is derived at load time as
+  # results/<active_cell_set> (i.e. results/pilot or results/final), so
+  # pilot and final artifacts can never collide or silently overwrite
+  # each other. See load_v2_config() in
+  # src/environment/v2_cooling_core.py.
 
 data:
-  active_cell_set: pilot          # pilot: [a,b,c,d]; final: [a..h] once e-h extracted
-  n_zones: 4                      # == number of active cells, NOT a fixed 3 (see
-                                   # docs/version2_research_design.md) -- update
-                                   # to 8 when active_cell_set becomes "final"
+  # active_cell_set and n_zones are NOT set here. This file used to
+  # duplicate configs/data_config.yaml's `active_cell_set`, which is a
+  # real hazard: the two could drift out of sync (e.g. data_config.yaml
+  # switched to "final" while this file still said "pilot"), silently
+  # producing an 8-cell dataset trained/evaluated as if it had 4 zones.
+  # load_v2_config() now reads active_cell_set from
+  # configs/data_config.yaml (the single source of truth) and derives
+  # n_zones from the actual loaded parquet's distinct cell count, not
+  # from a manually-maintained integer -- see
+  # tests/test_v2_pipeline.py::test_n_zones_equals_active_cell_count and
+  # the config-consistency checks in
+  # tests/test_v2_config_consistency.py.
   bin_seconds: 300                # native BigQuery extraction resolution (5 min);
                                    # see data_config.yaml candidate_control_bucket_seconds
                                    # for the Phase 11 resolution-selection experiment
