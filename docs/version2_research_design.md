@@ -82,24 +82,59 @@ it should be re-checked, not assumed to transfer unchanged, once cells
 e-h are available (per the master plan's "final model selection must be
 performed again on the complete dataset" rule).
 
-**Disclosed limitation of this calibration**: the sweep above sampled
-only 14 start indices spaced 400 bins apart. A closer look at classical
-controllers on the full 20-episode test set
-(`results/pilot/controllers/classical_controller_comparison.json`)
-shows PID, at this heat_scale_kw, still incurs violations on
-33.9% of steps (mean max temp 27.34°C) — i.e. even a reasonably-tuned
-PID running near-saturated cooling for most of an episode does not
-always hold the limit, once the actual real (variable, not
-worst-case-uniform) workload and the `action.max_rate_per_step=0.3`
-ramp limiter are both in play. **This is reported as a genuine,
-harder-than-first-estimated pilot finding, not silently re-tuned
-away**: it means the pilot control problem is meaningfully non-trivial
-(not every controller can trivially satisfy safety), which is arguably
-more useful for comparing controllers than a cleanly bimodal
-always-safe/always-unsafe split would have been — but it also means
-`heat_scale_kw` and/or `cooling_max_kw` deserve a denser, full-sweep
-recalibration (every start index, not every 400th) before any V2
-result is treated as final.
+**A real methodology bug was found and fixed while investigating this**
+(not a bug in the environment physics itself, but in how this
+calibration was first measured): the original 14-point sweep
+constructed `V2CoolingCore` with its default `use_safety_shield=None`,
+which reads `configs/v2_config.yaml`'s `safety_shield.enabled: true`.
+So the "cooling-off" and "full-cooling" runs were never actually
+open-loop — the safety shield was silently overriding the commanded
+`action=0` whenever it predicted a threshold breach, and the amount of
+override scales with `cooling_max_kw`. This was caught by a diagnostic
+showing the "cooling-off" trajectory's max temperature changing when
+`cooling_max_kw` was varied, which is physically impossible for a truly
+open-loop, action-independent cooling-off run
+(`cooling_kw = action * cooling_max_kw`, and `action=0` should zero
+that term regardless of `cooling_max_kw`). **Fix**: recalibrate with
+`use_safety_shield=False` explicitly, isolating the raw thermal/heat
+dynamics from the shield.
+
+**Corrected, dense (251-window, every-20th-bin) sweep, shield
+disabled**:
+
+| heat_scale_kw | cooling-off max temp (mean/max) | full-cooling max temp (mean/max) |
+|---|---|---|
+| 0.5 | 33.99 / 34.15 (100% violate) | 24.04 / 24.04 (0% violate) |
+| 0.75 | 39.60 / 39.84 | 24.29 / 24.46 |
+| **0.85** | **41.84 / 42.12 (100% violate)** | **26.44 / 26.71 (0% violate)** |
+| 0.9 | 42.97 / 43.26 | 27.56 / 27.85 (98% violate) |
+| 1.0 | 45.21 / 45.53 | 29.81 / 30.13 (100% violate) |
+
+**0.85 is re-confirmed as correctly calibrated**, now on the full dense
+sweep rather than the original confounded 14-point one: cooling-off
+violates on every one of 251 tested windows, full cooling stays safe on
+every one, with real margin before 0.9 breaks it. This supersedes (and
+corrects) the earlier table in this section, which was measured under
+the same shield confound.
+
+**Separately — a genuine, disclosed control-difficulty finding, not a
+bug**: given this corrected calibration, PID *with the shield enabled*
+(the intended, real evaluation configuration) still incurs violations
+on 33.9% of test-split steps
+(`results/pilot/controllers/classical_controller_comparison.json`).
+This is real and was investigated, not swept away: PID only commands
+strong cooling once temperature error is already large (a reactive, not
+proactive, controller), the actuator is rate-limited
+(`action.max_rate_per_step=0.3`), and the safety shield's correction is
+a one-step-ahead, myopic patch, not a guarantee against multi-step
+accumulated overshoot — exactly the documented limitation in
+`docs/safety_design.md` ("cannot always fully restore the margin in one
+step under strong thermal inertia"), now empirically observed on real
+official-Google-derived data rather than only asserted from V1. **This
+was not fixed by loosening the calibration** — the pilot control
+problem is genuinely harder than a cleanly bimodal always-safe/
+always-unsafe split, which is arguably more informative for comparing
+controllers than a trivial problem would be, and is reported as such.
 
 ## 4. Native 5-minute resolution, not V1's assumed 15-minute
 

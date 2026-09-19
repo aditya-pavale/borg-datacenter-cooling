@@ -1,0 +1,518 @@
+{
+  "pilot_disclaimer": "Cells a-d only -- see results/pilot/README.md. NOT final.",
+  "n_episodes": 20,
+  "results": {
+    "fixed__shield_on": {
+      "energy.total_kwh": {
+        "mean": 43.81889304963162,
+        "std": 0.10725047993476945,
+        "n_episodes": 20
+      },
+      "energy.mean_kw": {
+        "mean": 1.825787210401317,
+        "std": 0.0044687699972820434,
+        "n_episodes": 20
+      },
+      "thermal.mean_temp_c": {
+        "mean": 26.66508017968918,
+        "std": 0.053659670696841445,
+        "n_episodes": 20
+      },
+      "thermal.max_temp_c": {
+        "mean": 27.523865263631528,
+        "std": 0.08878973001738943,
+        "n_episodes": 20
+      },
+      "thermal.min_temp_c": {
+        "mean": 24.065051874617737,
+        "std": 0.00335999442215876,
+        "n_episodes": 20
+      },
+      "thermal.temp_variance": {
+        "mean": 0.5361105537224196,
+        "std": 0.038698676449816276,
+        "n_episodes": 20
+      },
+      "thermal.violation_steps": {
+        "mean": 158.55,
+        "std": 14.430783069535762,
+        "n_episodes": 20
+      },
+      "thermal.violation_pct": {
+        "mean": 55.052083333333336,
+        "std": 5.010688565811028,
+        "n_episodes": 20
+      },
+      "thermal.cumulative_violation_severity": {
+        "mean": 96.99436189628346,
+        "std": 33.13551593306837,
+        "n_episodes": 20
+      },
+      "thermal.max_overshoot_c": {
+        "mean": 0.5238652636315233,
+        "std": 0.08878973001738945,
+        "n_episodes": 20
+      },
+      "control.mean_action_change": {
+        "mean": 0.002677884653368616,
+        "std": 0.00027724605718522035,
+        "n_episodes": 20
+      },
+      "control.max_action_change": {
+        "mean": 0.48342632277817776,
+        "std": 0.024787398107555956,
+        "n_episodes": 20
+      },
+      "control.mean_action": {
+        "mean": 0.9128936052006585,
+        "std": 0.0022343849986410217,
+        "n_episodes": 20
+      },
+      "safety.n_interventions": {
+        "mean": 955.7,
+        "std": 4.583666654546336,
+        "n_episodes": 20
+      },
+      "safety.intervention_pct_steps": {
+        "mean": 83.94097222222224,
+        "std": 0.37837664440457136,
+        "n_episodes": 20
+      },
+      "n_steps": {
+        "mean": 288.0,
+        "std": 0.0,
+        "n_episodes": 20
+      }
+    },
+    "threshold__shield_on": {
+      "energy.total_kwh": {
+        "mean": 43.873449397840474,
+        "std": 0.11866127995080988,
+        "n_episodes": 20
+      },
+      "energy.mean_kw": {
+        "mean": 1.8280603915766869,
+        "std": 0.0049442199979504425,
+        "n_episodes": 20
+      },
+      "thermal.mean_temp_c": {
+        "mean": 26.659383435909938,
+        "std": 0.050900120975827925,
+        "n_episodes": 20
+      },
+      "thermal.max_temp_c": {
+        "mean": 27.500026713902876,
+        "std": 0.08850520919718469,
+        "n_episodes": 20
+      },
+      "thermal.min_temp_c": {
+        "mean": 24.07338520795107,
+        "std": 0.00335999442215876,
+        "n_episodes": 20
+      },
+      "thermal.temp_variance": {
+        "mean": 0.43621845880209864,
+        "std": 0.034403367804964835,
+        "n_episodes": 20
+      },
+      "thermal.violation_steps": {
+        "mean": 149.3,
+        "std": 14.356531614564851,
+        "n_episodes": 20
+      },
+      "thermal.violation_pct": {
+        "mean": 51.84027777777777,
+        "std": 4.984906810612796,
+        "n_episodes": 20
+      },
+      "thermal.cumulative_violation_severity": {
+        "mean": 84.8236573587008,
+        "std": 30.110594613288203,
+        "n_episodes": 20
+      },
+      "thermal.max_overshoot_c": {
+        "mean": 0.5000267139028812,
+        "std": 0.08850520919718469,
+        "n_episodes": 20
+      },
+      "control.mean_action_change": {
+        "mean": 0.003008629771899419,
+        "std": 0.00035261621260749307,
+        "n_episodes": 20
+      },
+      "control.max_action_change": {
+        "mean": 0.3,
+        "std": 5.551115123125783e-17,
+        "n_episodes": 20
+      },
+      "control.mean_action": {
+        "mean": 0.9140301957883434,
+        "std": 0.0024721099989752494,
+        "n_episodes": 20
+      },
+      "safety.n_interventions": {
+        "mean": 907.2,
+        "std": 9.892421341612982,
+        "n_episodes": 20
+      },
+      "safety.intervention_pct_steps": {
+        "mean": 80.85069444444443,
+        "std": 0.7388167649636526,
+        "n_episodes": 20
+      },
+      "n_steps": {
+        "mean": 288.0,
+        "std": 0.0,
+        "n_episodes": 20
+      }
+    },
+    "pid__shield_on": {
+      "energy.total_kwh": {
+        "mean": 44.55563463151686,
+        "std": 0.039514505335620585,
+        "n_episodes": 20
+      },
+      "energy.mean_kw": {
+        "mean": 1.8564847763132026,
+        "std": 0.0016464377223174888,
+        "n_episodes": 20
+      },
+      "thermal.mean_temp_c": {
+        "mean": 26.473451633040202,
+        "std": 0.06638123711278261,
+        "n_episodes": 20
+      },
+      "thermal.max_temp_c": {
+        "mean": 27.34408797482589,
+        "std": 0.09345198749615707,
+        "n_episodes": 20
+      },
+      "thermal.min_temp_c": {
+        "mean": 24.090051874617735,
+        "std": 0.0033599944221586573,
+        "n_episodes": 20
+      },
+      "thermal.temp_variance": {
+        "mean": 0.3432379659991428,
+        "std": 0.03319491179116752,
+        "n_episodes": 20
+      },
+      "thermal.violation_steps": {
+        "mean": 97.55,
+        "std": 22.265387937334488,
+        "n_episodes": 20
+      },
+      "thermal.violation_pct": {
+        "mean": 33.871527777777786,
+        "std": 7.731037478241141,
+        "n_episodes": 20
+      },
+      "thermal.cumulative_violation_severity": {
+        "mean": 33.498714284968266,
+        "std": 18.428483418542655,
+        "n_episodes": 20
+      },
+      "thermal.max_overshoot_c": {
+        "mean": 0.3440879748258846,
+        "std": 0.09345198749615707,
+        "n_episodes": 20
+      },
+      "control.mean_action_change": {
+        "mean": 0.003484320557491289,
+        "std": 2.3753679470656708e-19,
+        "n_episodes": 20
+      },
+      "control.max_action_change": {
+        "mean": 0.03930739874627032,
+        "std": 0.00045186019140951107,
+        "n_episodes": 20
+      },
+      "control.mean_action": {
+        "mean": 0.9282423881566013,
+        "std": 0.0008232188611587276,
+        "n_episodes": 20
+      },
+      "safety.n_interventions": {
+        "mean": 609.5,
+        "std": 67.7941737909682,
+        "n_episodes": 20
+      },
+      "safety.intervention_pct_steps": {
+        "mean": 68.21180555555556,
+        "std": 3.478249976263427,
+        "n_episodes": 20
+      },
+      "n_steps": {
+        "mean": 288.0,
+        "std": 0.0,
+        "n_episodes": 20
+      }
+    },
+    "fixed__shield_off": {
+      "energy.total_kwh": {
+        "mean": 23.966666666666676,
+        "std": 7.105427357601002e-15,
+        "n_episodes": 20
+      },
+      "energy.mean_kw": {
+        "mean": 0.9986111111111111,
+        "std": 1.1102230246251565e-16,
+        "n_episodes": 20
+      },
+      "thermal.mean_temp_c": {
+        "mean": 29.886356961797553,
+        "std": 0.07148677191776562,
+        "n_episodes": 20
+      },
+      "thermal.max_temp_c": {
+        "mean": 34.38786724771266,
+        "std": 0.0951116458958804,
+        "n_episodes": 20
+      },
+      "thermal.min_temp_c": {
+        "mean": 24.065051874617737,
+        "std": 0.00335999442215876,
+        "n_episodes": 20
+      },
+      "thermal.temp_variance": {
+        "mean": 8.43018615255901,
+        "std": 0.22868611045308856,
+        "n_episodes": 20
+      },
+      "thermal.violation_steps": {
+        "mean": 231.3,
+        "std": 1.4177446878757822,
+        "n_episodes": 20
+      },
+      "thermal.violation_pct": {
+        "mean": 80.31250000000001,
+        "std": 0.49227246106798317,
+        "n_episodes": 20
+      },
+      "thermal.cumulative_violation_severity": {
+        "mean": 3668.9369238047198,
+        "std": 78.04742092493139,
+        "n_episodes": 20
+      },
+      "thermal.max_overshoot_c": {
+        "mean": 7.3878672477126655,
+        "std": 0.0951116458958804,
+        "n_episodes": 20
+      },
+      "control.mean_action_change": {
+        "mean": 0.0006968641114982576,
+        "std": 2.168404344971009e-19,
+        "n_episodes": 20
+      },
+      "control.max_action_change": {
+        "mean": 0.20000000000000004,
+        "std": 2.7755575615628914e-17,
+        "n_episodes": 20
+      },
+      "control.mean_action": {
+        "mean": 0.49930555555555556,
+        "std": 5.551115123125783e-17,
+        "n_episodes": 20
+      },
+      "safety.n_interventions": {
+        "mean": 0.0,
+        "std": 0.0,
+        "n_episodes": 20
+      },
+      "safety.intervention_pct_steps": {
+        "mean": 0.0,
+        "std": 0.0,
+        "n_episodes": 20
+      },
+      "n_steps": {
+        "mean": 288.0,
+        "std": 0.0,
+        "n_episodes": 20
+      }
+    },
+    "threshold__shield_off": {
+      "energy.total_kwh": {
+        "mean": 36.3475,
+        "std": 0.03614208073700106,
+        "n_episodes": 20
+      },
+      "energy.mean_kw": {
+        "mean": 1.5144791666666666,
+        "std": 0.0015059200307084184,
+        "n_episodes": 20
+      },
+      "thermal.mean_temp_c": {
+        "mean": 27.83217565232194,
+        "std": 0.06794056556859746,
+        "n_episodes": 20
+      },
+      "thermal.max_temp_c": {
+        "mean": 30.153804220736816,
+        "std": 0.09527034460556165,
+        "n_episodes": 20
+      },
+      "thermal.min_temp_c": {
+        "mean": 24.07338520795107,
+        "std": 0.00335999442215876,
+        "n_episodes": 20
+      },
+      "thermal.temp_variance": {
+        "mean": 2.1707301703073982,
+        "std": 0.10976794962281342,
+        "n_episodes": 20
+      },
+      "thermal.violation_steps": {
+        "mean": 210.7,
+        "std": 2.776688675382964,
+        "n_episodes": 20
+      },
+      "thermal.violation_pct": {
+        "mean": 73.15972222222223,
+        "std": 0.9641280122857535,
+        "n_episodes": 20
+      },
+      "thermal.cumulative_violation_severity": {
+        "mean": 1315.0238432046785,
+        "std": 71.05283316420602,
+        "n_episodes": 20
+      },
+      "thermal.max_overshoot_c": {
+        "mean": 3.1538042207368155,
+        "std": 0.09527034460556165,
+        "n_episodes": 20
+      },
+      "control.mean_action_change": {
+        "mean": 0.002090592334494774,
+        "std": 0.0,
+        "n_episodes": 20
+      },
+      "control.max_action_change": {
+        "mean": 0.3,
+        "std": 5.551115123125783e-17,
+        "n_episodes": 20
+      },
+      "control.mean_action": {
+        "mean": 0.7572395833333333,
+        "std": 0.0007529600153542092,
+        "n_episodes": 20
+      },
+      "safety.n_interventions": {
+        "mean": 0.0,
+        "std": 0.0,
+        "n_episodes": 20
+      },
+      "safety.intervention_pct_steps": {
+        "mean": 0.0,
+        "std": 0.0,
+        "n_episodes": 20
+      },
+      "n_steps": {
+        "mean": 288.0,
+        "std": 0.0,
+        "n_episodes": 20
+      }
+    },
+    "pid__shield_off": {
+      "energy.total_kwh": {
+        "mean": 44.55563463151686,
+        "std": 0.039514505335620585,
+        "n_episodes": 20
+      },
+      "energy.mean_kw": {
+        "mean": 1.8564847763132026,
+        "std": 0.0016464377223174888,
+        "n_episodes": 20
+      },
+      "thermal.mean_temp_c": {
+        "mean": 26.473451633040202,
+        "std": 0.06638123711278261,
+        "n_episodes": 20
+      },
+      "thermal.max_temp_c": {
+        "mean": 27.34408797482589,
+        "std": 0.09345198749615707,
+        "n_episodes": 20
+      },
+      "thermal.min_temp_c": {
+        "mean": 24.090051874617735,
+        "std": 0.0033599944221586573,
+        "n_episodes": 20
+      },
+      "thermal.temp_variance": {
+        "mean": 0.3432379659991428,
+        "std": 0.03319491179116752,
+        "n_episodes": 20
+      },
+      "thermal.violation_steps": {
+        "mean": 97.55,
+        "std": 22.265387937334488,
+        "n_episodes": 20
+      },
+      "thermal.violation_pct": {
+        "mean": 33.871527777777786,
+        "std": 7.731037478241141,
+        "n_episodes": 20
+      },
+      "thermal.cumulative_violation_severity": {
+        "mean": 33.498714284968266,
+        "std": 18.428483418542655,
+        "n_episodes": 20
+      },
+      "thermal.max_overshoot_c": {
+        "mean": 0.3440879748258846,
+        "std": 0.09345198749615707,
+        "n_episodes": 20
+      },
+      "control.mean_action_change": {
+        "mean": 0.003484320557491289,
+        "std": 2.3753679470656708e-19,
+        "n_episodes": 20
+      },
+      "control.max_action_change": {
+        "mean": 0.03930739874627032,
+        "std": 0.00045186019140951107,
+        "n_episodes": 20
+      },
+      "control.mean_action": {
+        "mean": 0.9282423881566013,
+        "std": 0.0008232188611587276,
+        "n_episodes": 20
+      },
+      "safety.n_interventions": {
+        "mean": 0.0,
+        "std": 0.0,
+        "n_episodes": 20
+      },
+      "safety.intervention_pct_steps": {
+        "mean": 0.0,
+        "std": 0.0,
+        "n_episodes": 20
+      },
+      "n_steps": {
+        "mean": 288.0,
+        "std": 0.0,
+        "n_episodes": 20
+      }
+    }
+  },
+  "reliance_analysis": {
+    "fixed": {
+      "violation_pct_shield_on": 55.052083333333336,
+      "violation_pct_shield_off": 80.31250000000001,
+      "delta": 25.26041666666668,
+      "shield_dependent": true
+    },
+    "threshold": {
+      "violation_pct_shield_on": 51.84027777777777,
+      "violation_pct_shield_off": 73.15972222222223,
+      "delta": 21.319444444444457,
+      "shield_dependent": true
+    },
+    "pid": {
+      "violation_pct_shield_on": 33.871527777777786,
+      "violation_pct_shield_off": 33.871527777777786,
+      "delta": 0.0,
+      "shield_dependent": false
+    }
+  }
+}

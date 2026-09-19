@@ -1,0 +1,95 @@
+{
+  "pilot_disclaimer": "Cells a-d only, classical controllers only (RL still smoke-test). NOT final.",
+  "experiment_B_workload_spike": {
+    "scale_1.0": {
+      "pid": {
+        "energy": 44.56330325148045,
+        "max_temp": 27.34194337641662,
+        "viol_pct": 34.21296296296296
+      },
+      "threshold": {
+        "energy": 43.881068385112435,
+        "max_temp": 27.496860639646073,
+        "viol_pct": 51.85185185185186
+      }
+    },
+    "scale_2.0": {
+      "pid": {
+        "energy": 46.32014114893075,
+        "max_temp": 46.14613824538371,
+        "viol_pct": 93.70370370370371
+      },
+      "threshold": {
+        "energy": 46.52660357316645,
+        "max_temp": 46.10624423204481,
+        "viol_pct": 93.35648148148151
+      }
+    },
+    "scale_5.0": {
+      "pid": {
+        "energy": 46.37653652000259,
+        "max_temp": 47.01785822412549,
+        "viol_pct": 93.75
+      },
+      "threshold": {
+        "energy": 46.54999999999998,
+        "max_temp": 46.98421249209208,
+        "viol_pct": 93.4027777777778
+      }
+    },
+    "scale_10.0": {
+      "pid": {
+        "energy": 46.37653652000259,
+        "max_temp": 47.01785822412549,
+        "viol_pct": 93.75
+      },
+      "threshold": {
+        "energy": 46.54999999999998,
+        "max_temp": 46.98421249209208,
+        "viol_pct": 93.4027777777778
+      }
+    }
+  },
+  "experiment_C_forecast_error": {
+    "noise_0.0": {
+      "pid": {
+        "energy": 44.56330325148045,
+        "viol_pct": 34.21296296296296
+      },
+      "threshold": {
+        "energy": 43.881068385112435,
+        "viol_pct": 51.85185185185186
+      }
+    },
+    "noise_0.01": {
+      "pid": {
+        "energy": 44.56330325148045,
+        "viol_pct": 34.21296296296296
+      },
+      "threshold": {
+        "energy": 43.881068385112435,
+        "viol_pct": 51.85185185185186
+      }
+    },
+    "noise_0.05": {
+      "pid": {
+        "energy": 44.56330325148045,
+        "viol_pct": 34.21296296296296
+      },
+      "threshold": {
+        "energy": 43.881068385112435,
+        "viol_pct": 51.85185185185186
+      }
+    },
+    "noise_0.1": {
+      "pid": {
+        "energy": 44.56330325148045,
+        "viol_pct": 34.21296296296296
+      },
+      "threshold": {
+        "energy": 43.881068385112435,
+        "viol_pct": 51.85185185185186
+      }
+    }
+  }
+}
