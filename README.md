@@ -1,8 +1,47 @@
 # Borg-MARL Datacenter Cooling
 
 Deep-learning workload forecasting and multi-agent reinforcement
-learning for energy-efficient datacenter cooling, using the Google
-Borg cluster-trace export on Kaggle
+learning for energy-efficient datacenter cooling.
+
+## Version 2 — in progress (this branch: `v2-official-google-data`)
+
+V2 rebuilds the entire pipeline below on **official Google 2019 traces**
+(ClusterData2019 + PowerData2019, via BigQuery) instead of the
+undocumented Kaggle re-export V1 used. It is **not finished**: cells
+A–D are fully piloted, cells E–H are extracted for power/machine data
+but blocked on workload extraction by BigQuery Sandbox's free-tier
+monthly scan quota (a deliberate decision to stay off billing, not a
+data problem — see `docs/gcp_billing_blocker.md`). Nothing below in
+this section is a final result.
+
+| Area | Pilot (cells A–D) finding |
+|---|---|
+| Data alignment | Borg **cell** is the finest scientifically defensible workload↔power join key — verified against Google's own docs and schema, no machine-level mapping invented. `docs/official_data_alignment_audit.md` |
+| Forecasting | GRU test R² ≈ 0.824 vs. persistence 0.772 / moving-average 0.787 — a genuinely learnable signal, unlike V1's near-zero R² on sparse Kaggle data. `results/pilot/forecasting/metrics.json` |
+| Power model | First time this project has REAL power data: Random Forest validation R² ≈ 0.780 against official PowerData2019 measurements (V1 had none). `results/pilot/power_model/metrics.json` |
+| Thermal model | Recalibrated (`heat_scale_kw = 0.85`) on a dense 251-window sweep after finding and fixing a real calibration bug (the safety shield was silently confounding the first sweep). `docs/version2_research_design.md` |
+| Safety | Shield ablation shows PID's shield-on/off results are identical — not because PID is proactively safe, but because its cooling is already saturated. `results/pilot/safety_ablation/shield_ablation.json` |
+| RL | PPO/MAPPO pipelines run correctly end-to-end (smoke-test budgets only, far below a real training budget) — **not** a final controller comparison. |
+| Engineering | 62/62 tests passing, including a config-consistency suite added after a readiness audit caught a real pilot/final artifact-isolation bug. `docs/final_pipeline_readiness_audit.md` |
+
+Full documentation: `docs/official_data_alignment_audit.md`,
+`docs/version2_research_design.md`, `docs/gcp_billing_blocker.md`,
+`docs/storage_manifest.md`, `docs/final_pipeline_readiness_audit.md`,
+`results/model_selection_history.csv`. A faculty-facing progress deck
+(39 slides, generated from these same result files, every pilot slide
+tagged accordingly) is at
+`docs/presentations/BORG_Datacenter_Cooling_V2_Pilot_Presentation.pptx`.
+
+Once cells E–H are extracted, the full 8-cell dataset goes through
+final model selection, a frozen configuration, and one untouched final
+test evaluation — pilot numbers above will be re-measured, not
+carried forward as final.
+
+---
+
+## Version 1 (complete baseline, preserved at tag `v1-kaggle-baseline`)
+
+Uses the Google Borg cluster-trace export on Kaggle
 (`muzairbair/borg-traces-data`).
 
 **Full result, up front**: under this project's CPU-only compute
