@@ -1,0 +1,9 @@
+{
+  "raw_dir": "data/raw",
+  "files": {
+    "borg_traces_data.csv": {
+      "size_bytes": 328310714,
+      "md5": "b88966b4394c54206282a6b4a0c85b57"
+    }
+  }
+}

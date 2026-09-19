@@ -1,0 +1,179 @@
+# Central configuration for the Borg-MARL Datacenter Cooling project.
+# All scripts read parameters from here rather than hard-coding values.
+# Every parameter below is annotated with its evidence status in
+# docs/dataset_audit.md, docs/thermal_model.md, or docs/marl_design.md.
+
+seed: 0
+seeds: [0, 1, 2]  # reduced from the "prefer 5" guidance for compute-budget
+                  # reasons on a single CPU-only machine; documented in
+                  # docs/experiment_log.md.
+
+paths:
+  raw_csv: data/raw/borg_traces_data.csv
+  processed_dir: data/processed
+  models_dir: models
+  results_dir: results
+
+data:
+  # Borg trace timestamp unit is INFERRED (docs/dataset_audit.md S6), not
+  # documented by the Kaggle uploader. All downstream code treats
+  # start_time/end_time as microseconds.
+  timestamp_unit: microseconds
+  # bin_seconds was EMPIRICALLY determined, not imposed -- see
+  # docs/data_preprocessing.md. A 5-minute bin restricted to a single
+  # Borg cluster (the physically-cleaner zone-source choice) left 94% of
+  # zone/bin cells at zero, because this Kaggle export contains far
+  # fewer usage-report rows than a full periodic-telemetry table would
+  # (usage appears to be reported per lifecycle event, not per fixed
+  # interval per running instance). Pooling all 8 clusters and widening
+  # the bin to 15 minutes reduces zero-cells to ~30%, which was judged
+  # the most defensible trade-off available from this dataset.
+  bin_seconds: 900           # 15 minutes
+  cluster_for_zones: all     # pool ALL 8 Borg clusters as the workload
+                             # source (not one cluster) -- an empirically
+                             # necessary, explicitly documented departure
+                             # from the originally-preferred single-cluster
+                             # design; see docs/data_preprocessing.md.
+  n_zones: 3
+  zone_assignment_method: hash_mod_n  # deterministic hash(machine_id) % n_zones
+
+split:
+  train_frac: 0.6
+  val_frac: 0.2
+  test_frac: 0.2
+  # chronological, not random -- see docs/data_preprocessing.md
+
+forecasting:
+  horizon_steps: 2           # 2 x 15-minute steps = 30 minutes (preserves
+                              # the master plan's "predict the next 30
+                              # minutes" objective at the empirically
+                              # chosen 15-minute resolution)
+  lookback_steps: 16          # 4 hours of history as GRU input
+  gru_hidden_size: 32
+  gru_num_layers: 1
+  batch_size: 64
+  epochs: 30
+  learning_rate: 0.001
+  early_stopping_patience: 5
+
+power_model:
+  # CPU -> IT power model. ASSUMED / externally-sourced parameters, not
+  # calibrated against any measurement (none exist in this dataset).
+  # Values are illustrative, typical of published server power studies
+  # (e.g. Barroso & Holzle-style linear idle+dynamic power model).
+  p_idle_kw: 0.15    # idle power draw per zone's worth of servers (kW)
+  p_max_kw: 0.40     # power draw at utilization = 1.0 (kW)
+  # heat_fraction: fraction of electrical IT power converted to heat load
+  # on the cooling system (ASSUMED = 1.0, i.e. all electrical power is
+  # eventually rejected as heat -- standard first-order assumption).
+  heat_fraction: 1.0
+
+thermal:
+  # Lumped-parameter 3-zone thermal model. All parameters are simulation
+  # ASSUMPTIONS (category D), not calibrated -- no thermal measurements
+  # exist in the Borg dataset. See docs/thermal_model.md.
+  dt_seconds: 900   # matches data.bin_seconds (15-minute control interval)
+  # thermal_mass_kwh_per_c was EMPIRICALLY RECALIBRATED (see
+  # docs/experiment_log.md): the original value (2.0) made the safety
+  # constraint vacuous -- a stress test with cooling fully disabled for
+  # a full 24h episode, over every real test-split workload window,
+  # never exceeded 25.2C anywhere close to the 27C limit, so every
+  # controller would trivially "pass" safety regardless of quality.
+  # 0.5 was chosen because it is the smallest value (of {2.0, 0.5, 0.3,
+  # 0.15} tested) at which cooling-off already risks violating the
+  # limit (using idle-level heat alone) while full cooling can still
+  # comfortably keep the zone safe -- i.e. a genuinely non-trivial,
+  # solvable control problem, verified against real Borg-derived
+  # workload, not a synthetic worst case.
+  thermal_mass_kwh_per_c: 0.5        # C_i, per zone
+  coupling_kw_per_c: 0.05             # K_ij between adjacent zones
+  ambient_coupling_kw_per_c: 0.02     # K_amb
+  ambient_temp_c: 22.0
+  cooling_max_kw: 0.5                 # max heat removal per zone at action=1
+  cooling_efficiency: 1.0             # simplification: 1 kW action -> 1 kW removed
+  initial_temp_c: 24.0
+  safety_limit_c: 27.0
+
+action:
+  min: 0.0
+  max: 1.0
+  max_rate_per_step: 0.3   # action-rate limiting: max |a_t - a_{t-1}|,
+                             # simulation assumption to discourage chatter
+
+reward:
+  energy_weight: 1.0
+  safety_penalty_weight: 50.0   # large penalty for exceeding safety_limit_c
+  proximity_weight: 10.0         # soft penalty as temp approaches the limit (raised
+                                   # from 2.0 -- see docs/experiment_log.md reward
+                                   # correction: the sparse shield-penalty alone gave
+                                   # too weak/inconsistent a training gradient across
+                                   # short single-episode rollouts)
+  proximity_start_below_limit_c: 4.0  # proximity penalty now starts 4C below the
+                                        # limit (was 2C), giving a graded, every-step
+                                        # signal well before the shield territory
+  smoothness_weight: 0.5         # penalty on |a_t - a_{t-1}|
+  # shield_intervention_penalty_weight was ADDED after the first RL
+  # training/evaluation pass revealed a reward-design flaw (see
+  # docs/experiment_log.md): because the safety shield silently
+  # corrects unsafe actions before the environment computes the
+  # violation penalty, the reward as originally specified gave a
+  # policy NO incentive to avoid triggering the shield -- both MAPPO
+  # and PPO learned to cool almost nothing and let the shield do all
+  # the work (confirmed by the shield-off ablation: the same policy
+  # violates safety 20% of the time when the shield is removed). This
+  # term penalizes shield interventions directly, so genuine proactive
+  # cooling is rewarded over shield-dependent behavior.
+  shield_intervention_penalty_weight: 5.0
+
+safety_shield:
+  enabled: true
+  lookahead_steps: 1
+  margin_c: 0.5   # shield intervenes if predicted T > safety_limit_c - margin_c
+
+rl:
+  episode_length_steps: 96   # 1 simulated day at 15-minute resolution
+  ppo:
+    total_timesteps: 100000    # reduced for CPU-only compute budget; documented
+    n_steps: 96
+    batch_size: 96
+    n_epochs: 10
+    learning_rate: 0.0003
+    gamma: 0.99
+  mappo:
+    total_updates: 300
+    rollout_length: 96
+    n_epochs: 10
+    minibatch_size: 96
+    learning_rate: 0.0003
+    gamma: 0.99
+    gae_lambda: 0.95
+    clip_ratio: 0.2
+    entropy_coef: 0.001
+    value_coef: 0.5
+    reward_scale: 0.02   # ADDED after diagnosing an optimization failure
+                          # (docs/experiment_log.md): raw per-step rewards
+                          # were O(-90), giving O(-8000) episode returns,
+                          # which produced a very high-variance advantage/
+                          # value-learning signal for a single-96-step-
+                          # rollout-per-update on-policy setup. Scaling
+                          # the reward before it enters the trainer (not
+                          # the environment, which stays unscaled and
+                          # comparable to classical controllers) is a
+                          # standard PPO stabilization trick.
+
+controllers:
+  fixed:
+    action: 0.5
+  threshold:
+    on_temp_c: 25.5
+    off_temp_c: 24.5
+    on_action: 0.8
+    off_action: 0.2
+  pid:
+    kp: 0.3
+    ki: 0.02
+    kd: 0.05
+    setpoint_c: 24.5
+  mpc:
+    horizon_steps: 6
+    n_candidates: 64   # random-shooting MPC candidate count per step

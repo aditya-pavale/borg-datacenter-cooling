@@ -1,0 +1,8 @@
+[project]
+name = "borg-datacenter-cooling"
+version = "0.1.0"
+description = "Deep learning workload forecasting and multi-agent RL for datacenter cooling, using Borg workload traces"
+requires-python = ">=3.10"
+
+[tool.pytest.ini_options]
+testpaths = ["tests"]
