@@ -1,0 +1,26 @@
+| experiment       | condition   | controller   |   energy |   max_temp |   viol_pct |
+|:-----------------|:------------|:-------------|---------:|-----------:|-----------:|
+| B_workload_spike | scale_1.0   | pid          |  6.42953 |    24.9502 |          0 |
+| B_workload_spike | scale_1.0   | mappo_seed0  | 19.1641  |    23.9806 |          0 |
+| B_workload_spike | scale_1.0   | ppo_seed2    |  6.47206 |    25.8468 |          0 |
+| B_workload_spike | scale_2.0   | pid          |  6.52316 |    24.9553 |          0 |
+| B_workload_spike | scale_2.0   | mappo_seed0  | 19.2449  |    23.9811 |          0 |
+| B_workload_spike | scale_2.0   | ppo_seed2    |  6.46227 |    25.8899 |          0 |
+| B_workload_spike | scale_5.0   | pid          |  6.80406 |    24.9744 |          0 |
+| B_workload_spike | scale_5.0   | mappo_seed0  | 19.4875  |    23.9828 |          0 |
+| B_workload_spike | scale_5.0   | ppo_seed2    |  6.43398 |    26.0187 |          0 |
+| B_workload_spike | scale_10.0  | pid          |  7.27229 |    25.0112 |          0 |
+| B_workload_spike | scale_10.0  | mappo_seed0  | 19.8922  |    23.9856 |          0 |
+| B_workload_spike | scale_10.0  | ppo_seed2    |  6.38954 |    26.2324 |          0 |
+| C_forecast_error | noise_0.0   | pid          |  6.42953 |    24.9502 |          0 |
+| C_forecast_error | noise_0.0   | mappo_seed0  | 19.1641  |    23.9806 |          0 |
+| C_forecast_error | noise_0.0   | ppo_seed2    |  6.47206 |    25.8468 |          0 |
+| C_forecast_error | noise_0.01  | pid          |  6.42953 |    24.9502 |          0 |
+| C_forecast_error | noise_0.01  | mappo_seed0  | 19.163   |    23.9806 |          0 |
+| C_forecast_error | noise_0.01  | ppo_seed2    |  6.47161 |    25.8469 |          0 |
+| C_forecast_error | noise_0.05  | pid          |  6.42953 |    24.9502 |          0 |
+| C_forecast_error | noise_0.05  | mappo_seed0  | 19.1525  |    23.9806 |          0 |
+| C_forecast_error | noise_0.05  | ppo_seed2    |  6.46756 |    25.848  |          0 |
+| C_forecast_error | noise_0.1   | pid          |  6.42953 |    24.9502 |          0 |
+| C_forecast_error | noise_0.1   | mappo_seed0  | 19.1392  |    23.9806 |          0 |
+| C_forecast_error | noise_0.1   | ppo_seed2    |  6.46246 |    25.8494 |          0 |

@@ -29,10 +29,18 @@ class SingleAgentCoolingEnv(gym.Env):
     metadata = {"render_modes": []}
 
     def __init__(self, split: str = "train", use_forecast: bool = True,
-                 use_safety_shield: bool | None = None, cfg: dict | None = None):
+                 use_safety_shield: bool | None = None, cfg: dict | None = None,
+                 core=None):
         super().__init__()
-        self.core = CoolingCore(split=split, use_forecast=use_forecast,
-                                 use_safety_shield=use_safety_shield, cfg=cfg)
+        # `core`: inject a pre-built core (e.g. V2's core over official
+        # Google data, src/environment/v2_cooling_core.py) instead of
+        # constructing V1's Kaggle-backed CoolingCore. Additive,
+        # backward-compatible -- V1 callers that don't pass `core` are
+        # unaffected.
+        self.core = core if core is not None else CoolingCore(
+            split=split, use_forecast=use_forecast,
+            use_safety_shield=use_safety_shield, cfg=cfg,
+        )
         n = self.core.n_zones
         h = self.core.horizon
         obs_dim = n + n + n + n * h + n + 3

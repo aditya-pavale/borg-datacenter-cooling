@@ -1,0 +1,105 @@
+{
+  "pilot_disclaimer": "Cells a-d only -- see results/pilot/README.md. NOT final.",
+  "config": {
+    "lookback": 48,
+    "horizon": 6,
+    "n_zones": 4,
+    "bin_seconds": 300,
+    "value_col": "sum_cpu",
+    "cell_set": "pilot"
+  },
+  "overall": {
+    "gru": {
+      "label": "gru_overall",
+      "n": 6928,
+      "mae": 260.2685852050781,
+      "rmse": 366.9729309082031,
+      "r2": 0.8244366645812988
+    },
+    "persistence": {
+      "label": "persistence_overall",
+      "n": 6928,
+      "mae": 290.1357116699219,
+      "rmse": 417.98193359375,
+      "r2": 0.7722381949424744
+    },
+    "moving_average": {
+      "label": "moving_average_overall",
+      "n": 6928,
+      "mae": 284.0633239746094,
+      "rmse": 403.98687744140625,
+      "r2": 0.787234902381897
+    }
+  },
+  "by_regime": {
+    "low_load": {
+      "gru": {
+        "label": "gru_low_load",
+        "n": 3464,
+        "mae": 246.4440460205078,
+        "rmse": 360.84600830078125,
+        "r2": 0.5188124179840088
+      },
+      "persistence": {
+        "label": "persistence_low_load",
+        "n": 3464,
+        "mae": 262.6763916015625,
+        "rmse": 393.0259704589844,
+        "r2": 0.4291616678237915
+      },
+      "moving_average": {
+        "label": "moving_average_low_load",
+        "n": 3464,
+        "mae": 262.33135986328125,
+        "rmse": 389.1410827636719,
+        "r2": 0.4403908848762512
+      }
+    },
+    "high_load": {
+      "gru": {
+        "label": "gru_high_load",
+        "n": 3464,
+        "mae": 274.0931091308594,
+        "rmse": 372.99920654296875,
+        "r2": 0.4731251001358032
+      },
+      "persistence": {
+        "label": "persistence_high_load",
+        "n": 3464,
+        "mae": 317.5950622558594,
+        "rmse": 441.52960205078125,
+        "r2": 0.26173657178878784
+      },
+      "moving_average": {
+        "label": "moving_average_high_load",
+        "n": 3464,
+        "mae": 305.7952880859375,
+        "rmse": 418.30615234375,
+        "r2": 0.3373561501502991
+      }
+    },
+    "burst": {
+      "gru": {
+        "label": "gru_burst",
+        "n": 693,
+        "mae": 322.3076171875,
+        "rmse": 432.1085205078125,
+        "r2": 0.1797509789466858
+      },
+      "persistence": {
+        "label": "persistence_burst",
+        "n": 693,
+        "mae": 456.06060791015625,
+        "rmse": 607.9481201171875,
+        "r2": -0.623652458190918
+      },
+      "moving_average": {
+        "label": "moving_average_burst",
+        "n": 693,
+        "mae": 383.46435546875,
+        "rmse": 510.088623046875,
+        "r2": -0.1430133581161499
+      }
+    }
+  }
+}

@@ -202,15 +202,32 @@ real, per the master plan's requirement.
 | `powerdata_2019`, all 50 PDU tables (union) | 15,990,048 bytes (~15 MB) | succeeded |
 
 **Result: cells a, b, c, d of the workload trace are extracted; cells
-e, f, g, h are not, because this GCP project has no billing account
-linked and BigQuery Sandbox's free monthly scan allowance was exhausted
-partway through the 5th cell.** This is a genuine, disclosed human-only
-dependency, not a bug: `scripts/bigquery/run_clusterdata_extraction.sh`
-will pick up exactly where it left off (it skips cells with an existing,
-non-error output file) once billing is enabled on
-`borg-datacenter-cooling-v2`. `machine_events` and the complete
-`powerdata_2019` (all 50 tables, all 8 cells) were extracted in full —
-they are cheap enough to fit the sandbox allowance regardless.
+e, f, g, h are not**, because BigQuery Sandbox's free monthly
+bytes-scanned allowance was exhausted partway through the 5th cell.
+**Decision (explicit, user's own): stay on the free tier — do not link
+a billing account — and extract e-h once the monthly allowance resets.**
+The extraction query was further optimized after this decision
+(`extract_clusterdata_workload_lite.sql`: drops `COUNT(DISTINCT
+machine_id)`, cutting per-cell cost from ~181 GB to ~146-185 GB); the
+four remaining cells combined are estimated at **673,348,771,176 bytes
+(~627 GiB)**, dry-run-verified on 2026-09-19, which should fit inside
+one reset cycle with real margin under the ~724-905 GB cap range
+observed today. `scripts/bigquery/run_clusterdata_extraction.sh` will
+pick up exactly where it left off (it skips cells with an existing,
+non-error output file) — re-run it after the reset. See
+`docs/gcp_billing_blocker.md` for the exact status and the one thing
+that would need to change if this decision is ever revisited.
+`machine_events` and the complete `powerdata_2019` (all 50 tables, all
+8 cells) were extracted in full already — they were cheap enough to fit
+the sandbox allowance regardless.
+
+**Schema note**: because the lite query was adopted only after cells
+a-d were already extracted with the heavier query, cells a-d carry an
+extra `n_machines` (distinct active machines per bucket) column that
+cells e-h will not have. This is a real, disclosed asymmetry, not an
+oversight — `n_machines` is a diagnostic field, not an input to the
+power model or forecaster, so it does not affect comparability of the
+core `sum_cpu`/`sum_mem` signal across all 8 cells once e-h land.
 
 ## 8. What this blocks downstream
 

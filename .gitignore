@@ -9,6 +9,27 @@ data/processed/*
 
 models/*
 results/*
+# Decision (V2, resolves the open item flagged in V1's
+# final_handoff_report.md S15): commit compact, text-based result
+# summaries (JSON/CSV/MD -- metrics, model_selection_history.csv,
+# README disclaimers) since they ARE the reproducibility record and
+# cost nothing to store; keep large/binary outputs (rendered figures,
+# trained model weights) out of git, regenerable from scripts + the
+# committed summaries instead. (A parent-directory exclude blocks git
+# from even looking at file-level rules inside it, so directories must
+# be re-included explicitly before the binary extensions below can be
+# re-excluded within them.)
+!results/**/
+!results/*.csv
+!results/*.json
+!results/*.md
+results/**/*.png
+results/**/*.jpg
+results/**/*.npy
+results/**/*.npz
+results/**/*.pt
+results/**/*.pth
+results/**/*.zip
 
 .ipynb_checkpoints/
 *.log

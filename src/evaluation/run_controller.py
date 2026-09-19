@@ -20,13 +20,18 @@ from evaluation.metrics import compute_episode_metrics, aggregate_across_episode
 
 def run_controller_episodes(controller, split: str, start_indices: list[int],
                              use_forecast: bool = True, use_safety_shield: bool | None = None,
-                             cfg: dict | None = None) -> dict:
+                             cfg: dict | None = None, core=None) -> dict:
     cfg = cfg or load_config()
     dt_hours = cfg["thermal"]["dt_seconds"] / 3600.0
     safety_limit = cfg["thermal"]["safety_limit_c"]
 
-    core = CoolingCore(split=split, use_forecast=use_forecast,
-                        use_safety_shield=use_safety_shield, cfg=cfg)
+    # `core`: inject a pre-built core (e.g. V2's V2CoolingCore) instead
+    # of constructing V1's Kaggle-backed CoolingCore. Additive,
+    # backward-compatible.
+    core = core if core is not None else CoolingCore(
+        split=split, use_forecast=use_forecast,
+        use_safety_shield=use_safety_shield, cfg=cfg,
+    )
 
     episode_metrics = []
     for start_idx in start_indices:
@@ -46,11 +51,11 @@ def run_controller_episodes(controller, split: str, start_indices: list[int],
     }
 
 
-def fixed_test_start_indices(split: str, n_episodes: int, cfg: dict | None = None) -> list[int]:
+def fixed_test_start_indices(split: str, n_episodes: int, cfg: dict | None = None, core=None) -> list[int]:
     """Deterministic, evenly-spaced episode start indices for a split --
     identical for every controller evaluated on that split (fairness)."""
     cfg = cfg or load_config()
-    core = CoolingCore(split=split, cfg=cfg)
+    core = core if core is not None else CoolingCore(split=split, cfg=cfg)
     lookback = cfg["forecasting"]["lookback_steps"]
     min_start = lookback - 1
     max_start = core.n_bins - core.episode_length - core.horizon - 1

@@ -1,0 +1,10 @@
+test,status
+1. Zero cooling + zero workload -> relax toward ambient,PASS
+"2. Constant workload, no cooling -> rises monotonically toward the analytical equilibrium T_amb + Q/K_amb (no blow-up)",PASS
+3. Step workload increase -> temperature increases,PASS
+4. Step workload decrease -> temperature decreases,PASS
+5. Cooling step increase -> temperature decreases,PASS
+6. Cooling step decrease -> temperature increases,PASS
+7. Zone coupling: heating zone 0 warms 1 and 2 with attenuation by distance,PASS
+8. Ambient disturbance: hotter ambient -> higher steady-state zone temps,PASS
+"9. Numerical stability: no divergence, no absurd single-step jumps",PASS

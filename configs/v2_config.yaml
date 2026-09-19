@@ -1,0 +1,145 @@
+# V2 pipeline/model/RL configuration. Mirrors the structure of V1's
+# configs/config.yaml so downstream modules (thermal, environment,
+# controllers, marl) can be reused with minimal changes; values that
+# differ from V1, and why, are annotated inline. See
+# configs/data_config.yaml for raw-data/extraction settings and
+# docs/version2_research_design.md for the zones-are-cells rationale.
+
+seed: 0
+seeds: [0, 1, 2]
+
+paths:
+  processed_dir: data/processed/v2
+  models_dir: models/v2
+  results_dir: results/pilot
+
+data:
+  active_cell_set: pilot          # pilot: [a,b,c,d]; final: [a..h] once e-h extracted
+  n_zones: 4                      # == number of active cells, NOT a fixed 3 (see
+                                   # docs/version2_research_design.md) -- update
+                                   # to 8 when active_cell_set becomes "final"
+  bin_seconds: 300                # native BigQuery extraction resolution (5 min);
+                                   # see data_config.yaml candidate_control_bucket_seconds
+                                   # for the Phase 11 resolution-selection experiment
+
+split:
+  train_frac: 0.6
+  val_frac: 0.2
+  test_frac: 0.2
+
+forecasting:
+  # 48 steps x 5 min = 4 hours lookback, 6 steps x 5 min = 30 min horizon
+  # -- same real-world spans as V1, re-expressed at the native 5-minute
+  # resolution instead of V1's 15-minute bins.
+  horizon_steps: 6
+  lookback_steps: 48
+  gru_hidden_size: 32
+  gru_num_layers: 1
+  batch_size: 64
+  epochs: 30
+  learning_rate: 0.001
+  early_stopping_patience: 5
+  value_col: sum_cpu               # raw per-cell summed CPU demand (not a [0,1]
+                                    # utilization fraction like V1's cpu_util --
+                                    # min-max normalization is fit on TRAIN only,
+                                    # same as V1)
+
+power_model:
+  # FITTED (not assumed, unlike V1): see results/pilot/power_model/metrics.json
+  # and scripts/v2_fit_power_model.py. Model selected on validation RMSE.
+  selected_model: random_forest
+  model_path: models/v2/power_model/random_forest.joblib
+  features: [sum_cpu, sum_mem, cell_code]
+  target: mean_measured_power_util   # fraction of PDU rated capacity, NOT watts
+  # heat_scale_kw converts the model's predicted utilization FRACTION
+  # into a heat-flow-equivalent quantity for the thermal ODE below. This
+  # is an ASSUMED simulation constant (same role as V1's p_max_kw) --
+  # no PDU capacity in kW is present anywhere in the public PowerData2019
+  # schema (docs/official_data_alignment_audit.md S3), so an absolute
+  # watt figure cannot be derived, only assumed.
+  # EMPIRICALLY RECALIBRATED (2026-09-19, pilot cells a-d): the original
+  # 0.5 made the safety constraint nearly vacuous (cooling-off plateaus
+  # at ~26.5C, never crossing the 27C limit across 26 sampled
+  # full-day episodes; V1 hit the identical failure mode with its
+  # thermal_mass parameter, docs/experiment_log.md). Swept {0.5, 0.8,
+  # 0.85, 0.88, 0.9, 0.92, 0.95, 1.0, 1.3, 1.6, 2.0}: 1.0+ makes even
+  # FULL cooling fail (cooling_max_kw undersized for that heat level,
+  # an unsolvable rather than non-trivial problem); 0.85 is the
+  # smallest tested value at which cooling-off already exceeds the
+  # limit (mean max temp 27.3C, up to 27.6C) while full cooling stays
+  # comfortably under it (mean max temp 26.4C) -- a genuinely
+  # non-trivial, solvable control problem, verified against real
+  # official-Google-derived workload, not a synthetic worst case.
+  heat_scale_kw: 0.85
+
+thermal:
+  # Same ASSUMED simulation category as V1 (docs/thermal_model.md);
+  # carried over unchanged as a starting point for n_zones=4, subject to
+  # the same validation battery (scripts/validate_thermal_model.py
+  # equivalent for V2) before being trusted for RL training.
+  dt_seconds: 300
+  thermal_mass_kwh_per_c: 0.5
+  coupling_kw_per_c: 0.05
+  ambient_coupling_kw_per_c: 0.02
+  ambient_temp_c: 22.0
+  cooling_max_kw: 0.5
+  cooling_efficiency: 1.0
+  initial_temp_c: 24.0
+  safety_limit_c: 27.0
+
+action:
+  min: 0.0
+  max: 1.0
+  max_rate_per_step: 0.3
+
+reward:
+  energy_weight: 1.0
+  safety_penalty_weight: 50.0
+  proximity_weight: 10.0
+  proximity_start_below_limit_c: 4.0
+  smoothness_weight: 0.5
+  shield_intervention_penalty_weight: 5.0
+
+safety_shield:
+  enabled: true
+  lookahead_steps: 1
+  margin_c: 0.5
+
+rl:
+  episode_length_steps: 288   # 1 simulated day at 5-minute resolution (was 96 at 15-min in V1)
+  ppo:
+    total_timesteps: 100000
+    n_steps: 288
+    batch_size: 96
+    n_epochs: 10
+    learning_rate: 0.0003
+    gamma: 0.99
+  mappo:
+    total_updates: 300
+    rollout_length: 288
+    n_epochs: 10
+    minibatch_size: 96
+    learning_rate: 0.0003
+    gamma: 0.99
+    gae_lambda: 0.95
+    clip_ratio: 0.2
+    entropy_coef: 0.001
+    value_coef: 0.5
+    reward_scale: 0.02
+
+controllers:
+  fixed:
+    action: 0.5
+  threshold:
+    on_temp_c: 25.5
+    off_temp_c: 24.5
+    on_action: 0.8
+    off_action: 0.2
+  pid:
+    kp: 0.3
+    ki: 0.02
+    kd: 0.05
+    setpoint_c: 24.5
+  mpc:
+    horizon_steps: 6
+    n_candidates: 64

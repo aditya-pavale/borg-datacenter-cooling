@@ -1,0 +1,47 @@
+# V2 data configuration -- official Google 2019 traces.
+# Every downstream V2 script reads cells/paths/resolution from here so
+# that adding cells e-h later (once BigQuery billing is enabled) is a
+# one-line config change, not a code change.
+#
+# Zone design decision (documented in full in
+# docs/version2_research_design.md): V1 used 3 SYNTHETIC zones built by
+# hashing machine_id, because the Kaggle export carried no real
+# partitioning of machines. V2 has a REAL, Google-defined partition --
+# the Borg cell -- established as the finest scientifically defensible
+# join key in docs/official_data_alignment_audit.md. Re-mixing real
+# cells into an arbitrary fixed count of 3 "zones" would reintroduce
+# exactly the kind of unjustified aggregation that audit was written to
+# avoid. V2 therefore treats each Borg cell as one thermal/control zone
+# directly: n_zones == len(cells). This is a deliberate, documented
+# departure from V1's zone count, not an oversight.
+
+cells:
+  pilot: [a, b, c, d]   # extracted, billing-free (docs/storage_manifest.md)
+  final: [a, b, c, d, e, f, g, h]   # requires billing on borg-datacenter-cooling-v2
+active_cell_set: pilot   # switch to "final" once e-h are extracted
+
+resolution:
+  native_bucket_seconds: 300   # 5 minutes -- BigQuery extraction native resolution
+  # Candidate CONTROL resolutions to be evaluated in Phase 7/11 against
+  # forecast quality, thermal dynamics, and control stability -- not
+  # assumed. The base extraction stays at 5 minutes; these are produced
+  # by resampling, not re-querying BigQuery.
+  candidate_control_bucket_seconds: [300, 600, 900]
+
+paths:
+  raw_dir: data/raw/official_google_2019
+  workload_glob: "clusterdata_workload_5min_cell_*.csv"
+  powerdata_file: "powerdata_all_pdus.csv"
+  machine_events_file: "machine_events_all_cells.csv"
+  processed_dir: data/processed/v2
+
+split:
+  train_frac: 0.6
+  val_frac: 0.2
+  test_frac: 0.2
+  # chronological, per cell -- same discipline as V1 (docs/data_preprocessing.md)
+
+bigquery:
+  project: borg-datacenter-cooling-v2
+  source_project: "google.com:google-cluster-data"
+  billing_enabled: false   # see docs/official_data_alignment_audit.md S7

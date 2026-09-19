@@ -1,0 +1,57 @@
+{
+  "selected_on": "validation RMSE",
+  "best_model": "random_forest",
+  "results": {
+    "constant_baseline": {
+      "mae": 0.03392502458470441,
+      "rmse": 0.04177684343411477,
+      "r2": -0.18719897950764186
+    },
+    "linear_pooled": {
+      "mae": 0.01849661844166025,
+      "rmse": 0.022762424903583527,
+      "r2": 0.6475566492365339,
+      "coef": {
+        "sum_cpu": 3.236490365678276e-05,
+        "sum_mem": -1.0876971568377717e-07
+      },
+      "intercept": 0.5340058464615993
+    },
+    "linear_plus_cell_fixed_effect": {
+      "mae": 0.016497428968805575,
+      "rmse": 0.020488398106363766,
+      "r2": 0.7144591302740689
+    },
+    "random_forest": {
+      "mae": 0.014051429787996388,
+      "rmse": 0.01797748644789102,
+      "r2": 0.7801582312208459,
+      "feature_importances": {
+        "sum_cpu": 0.5839463935977934,
+        "sum_mem": 0.04873611874196981,
+        "cell_code": 0.36731748766023675
+      }
+    }
+  },
+  "residuals_by_load_tercile": [
+    {
+      "regime": "low",
+      "mean": 0.0024150880776376057,
+      "std": 0.015639285586022806,
+      "count": 2382
+    },
+    {
+      "regime": "mid",
+      "mean": 0.004094296722201895,
+      "std": 0.016301239011537374,
+      "count": 2381
+    },
+    {
+      "regime": "high",
+      "mean": 0.014645686143524086,
+      "std": 0.014916390678204666,
+      "count": 2381
+    }
+  ],
+  "note": "Pilot (cells a-d) only. Not final. Target is a PDU-capacity utilization fraction, not absolute watts."
+}

@@ -20,14 +20,22 @@ import numpy as np
 
 from environment.cooling_core import CoolingCore
 
-AGENT_NAMES = ["zone_0", "zone_1", "zone_2"]
+AGENT_NAMES = [f"zone_{i}" for i in range(8)]  # extended from 3 to cover V2's
+                                                 # up-to-8-cell-as-zones design
+                                                 # (docs/version2_research_design.md);
+                                                 # a slice of the first 3 names is
+                                                 # unchanged for V1 callers.
 
 
 class MultiAgentCoolingEnv:
     def __init__(self, split: str = "train", use_forecast: bool = True,
-                 use_safety_shield: bool | None = None, cfg: dict | None = None):
-        self.core = CoolingCore(split=split, use_forecast=use_forecast,
-                                 use_safety_shield=use_safety_shield, cfg=cfg)
+                 use_safety_shield: bool | None = None, cfg: dict | None = None,
+                 core=None):
+        # `core`: see single_agent_env.py -- same injection point for V2.
+        self.core = core if core is not None else CoolingCore(
+            split=split, use_forecast=use_forecast,
+            use_safety_shield=use_safety_shield, cfg=cfg,
+        )
         self.n_zones = self.core.n_zones
         self.agents = AGENT_NAMES[: self.n_zones]
         self.horizon = self.core.horizon

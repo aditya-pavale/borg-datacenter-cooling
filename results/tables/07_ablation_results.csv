@@ -1,0 +1,5 @@
+ablation,energy_kwh,violation_pct
+forecast: with,19.153132143989207,
+forecast: without,19.157553617283703,
+safety shield: on,19.153132143989207,0.0
+safety shield: off,19.153132143989207,0.0
